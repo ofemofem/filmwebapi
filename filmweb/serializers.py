@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Movie, MovieComment, MovieRate,MovieSubComment
+from .models import Movie, MovieComment, MovieRate, MovieSubComment, MovieCategory
 from django.contrib.auth.models import User
+from django.db.models import Avg
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -11,6 +12,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
             'password': {'write_only': True}
         }
 
+class MovieCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MovieCategory
+        fields = '__all__'
 
 class MovieSubCommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,7 +24,6 @@ class MovieSubCommentSerializer(serializers.ModelSerializer):
 
 
 class MovieCommentSerializer(serializers.ModelSerializer):
-    subcomments = MovieSubCommentSerializer(many=True, required=False)
 
     class Meta:
         model = MovieComment
@@ -27,16 +31,30 @@ class MovieCommentSerializer(serializers.ModelSerializer):
 
 
 class MovieRateSerializer(serializers.ModelSerializer):
+    rate = serializers.FloatField(max_value=10, min_value=1)
+
     class Meta:
         model = MovieRate
         fields = '__all__'
 
 
 class MovieSerializer(serializers.ModelSerializer):
-    comments = MovieCommentSerializer(many=True, required=False)
-    rates = MovieRateSerializer(many=True, required=False)
+    # comments = MovieCommentSerializer(many=True, required=False)
+    # rates = MovieRateSerializer(many=True, required=False)
+    categories = MovieCategorySerializer(read_only=True, many=True)
+    rates_average = serializers.SerializerMethodField()
+
+    def get_rates_average(self, obj):
+
+        r = obj.rates.all().aggregate(Avg('rate'))['rate__avg']
+        if r is not None:
+            return round(r, 1)
+        return 0
+
 
     class Meta:
         model = Movie
-        fields = ('id', 'title', 'year', 'desc', 'created_by', 'pub_date', 'comments', 'rates')
+        fields = ('id', 'title', 'year', 'desc', 'created_by', 'pub_date', 'rates_average', 'categories')
+
+
 

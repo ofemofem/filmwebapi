@@ -24,6 +24,7 @@ router.register('movies', views.MovieViewSet, base_name='Movie')
 router.register('comments', views.MovieCommentViewSet, base_name='MovieComment')
 router.register('subcomments', views.MovieSubCommentViewSet)
 router.register('rates', views.RateViewSet)
+router.register('category', views.MovieCategoryViewSet)
 router.register('users', views.UserViewSet)
 
 urlpatterns = [
