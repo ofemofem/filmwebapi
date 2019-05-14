@@ -1,16 +1,13 @@
-from rest_framework import serializers
-from .models import Movie, MovieComment, MovieRate, MovieSubComment, MovieCategory
-from django.contrib.auth.models import User
+from .models import Movie, MovieComment, MovieRate, MovieSubComment, MovieCategory, MovieReview
 from django.db.models import Avg
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class MovieReviewSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ('url', 'id', 'username', 'password')
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        model = MovieReview
+        fields = '__all__'
 
 class MovieCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,19 +39,19 @@ class MovieSerializer(serializers.ModelSerializer):
     # comments = MovieCommentSerializer(many=True, required=False)
     # rates = MovieRateSerializer(many=True, required=False)
     categories = MovieCategorySerializer(read_only=True, many=True)
-    rates_average = serializers.SerializerMethodField()
-
-    def get_rates_average(self, obj):
-
-        r = obj.rates.all().aggregate(Avg('rate'))['rate__avg']
-        if r is not None:
-            return round(r, 1)
-        return 0
+    # rates_average = serializers.SerializerMethodField()
+    #
+    # def get_rates_average(self, obj):
+    #
+    #     r = obj.rates.all().aggregate(Avg('rate'))['rate__avg']
+    #     if r is not None:
+    #         return round(r, 1)
+    #     return 0
 
 
     class Meta:
         model = Movie
-        fields = ('id', 'title', 'year', 'desc', 'created_by', 'pub_date', 'rates_average', 'categories')
+        fields = ('id', 'title', 'year', 'desc', 'created_by', 'pub_date', 'categories', 'rates_avg', 'rates_count')
 
 
 

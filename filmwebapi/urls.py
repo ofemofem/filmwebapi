@@ -19,17 +19,21 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from filmweb import views
 
+from rest_framework_simplejwt import views as jwt_views
+
 router = DefaultRouter()
 router.register('movies', views.MovieViewSet, base_name='Movie')
 router.register('comments', views.MovieCommentViewSet, base_name='MovieComment')
 router.register('subcomments', views.MovieSubCommentViewSet)
-router.register('rates', views.RateViewSet)
+router.register('rates', views.MovieRateViewSet, base_name='MovieRate')
 router.register('category', views.MovieCategoryViewSet)
-router.register('users', views.UserViewSet)
+router.register('reviews', views.MovieReviewViewSet, base_name='MovieReview')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
+    path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 
